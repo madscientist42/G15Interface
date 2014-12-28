@@ -40,6 +40,7 @@ What doesn't work (Yet- it *IS* a WIP...):
   so you can do key-macro recording with a daemon upstream of this, etc.)
 
 This is being exposed in Git with an intent of publishing early and often.  
+
 It *currently* is not really intended for general public consumption- but 
 is up for me being able to have multiple backups of the work and history 
 and to allow someone that is a dev to scoop it up and extend it (Hey, if you 
