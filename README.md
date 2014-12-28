@@ -11,8 +11,9 @@ lib, or any of that.  It's a functional re-work of the whole thing with an eye
 on being quite a bit more sophisticated (The original was a bit dumb in that it
 only worked with the first device found and you were done.  If you have a Z10
 speaker set, you didn't get it to work or your nifty G510s or G13 wouldn't work
-right.  Not really acceptable.  Right now, it's framed in to be able to list
-and provide control support for multiple devices on the machine in question.
+right.  Not really acceptable...in any manner...)  Right now, it's framed in to 
+be able to list and provide control support for multiple devices on the machine 
+in question.
 
 What works:
 
