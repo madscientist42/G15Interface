@@ -975,13 +975,6 @@ int G15Interface::getPressedKeys(uint64_t *pressed_keys, unsigned int timeout)
 			retVal = G15_ERROR_TRY_AGAIN;
 			break;
 
-		case 2:
-			// Pretty much all of the HID-centric output from the
-			// G-series keyboards and devices appear to be 2, 5, and 8
-			cout << "Got an 2-byte-er...probably need to process this one..." << endl;
-			retVal = G15_ERROR_TRY_AGAIN;
-			break;
-
 		default:
 			cout << "read op got " << ret << "bytes - ";
 			for (int i = 0; i < ret; i++)
