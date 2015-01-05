@@ -514,174 +514,6 @@ int G15Interface::writeMonoPixmapToLCD(unsigned char const *data)
 }
 
 
-void G15Interface::processKeyEvent9Byte(uint64_t *pressed_keys, unsigned char *buffer)
-{
-    *pressed_keys = 0;
-
-    log(stderr,G15_LOG_WARN,"Keyboard: %x, %x, %x, %x, %x, %x, %x, %x, %x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4],buffer[5],buffer[6],buffer[7],buffer[8]);
-
-    if (buffer[0] == 0x02)
-    {
-        if (buffer[1]&0x01)
-            *pressed_keys |= G15_KEY_G1;
-
-        if (buffer[2]&0x02)
-            *pressed_keys |= G15_KEY_G2;
-
-        if (buffer[3]&0x04)
-            *pressed_keys |= G15_KEY_G3;
-
-        if (buffer[4]&0x08)
-            *pressed_keys |= G15_KEY_G4;
-
-        if (buffer[5]&0x10)
-            *pressed_keys |= G15_KEY_G5;
-
-        if (buffer[6]&0x20)
-            *pressed_keys |= G15_KEY_G6;
-
-
-        if (buffer[2]&0x01)
-            *pressed_keys |= G15_KEY_G7;
-
-        if (buffer[3]&0x02)
-            *pressed_keys |= G15_KEY_G8;
-
-        if (buffer[4]&0x04)
-            *pressed_keys |= G15_KEY_G9;
-
-        if (buffer[5]&0x08)
-            *pressed_keys |= G15_KEY_G10;
-
-        if (buffer[6]&0x10)
-            *pressed_keys |= G15_KEY_G11;
-
-        if (buffer[7]&0x20)
-            *pressed_keys |= G15_KEY_G12;
-
-        if (buffer[1]&0x04)
-            *pressed_keys |= G15_KEY_G13;
-
-        if (buffer[2]&0x08)
-            *pressed_keys |= G15_KEY_G14;
-
-        if (buffer[3]&0x10)
-            *pressed_keys |= G15_KEY_G15;
-
-        if (buffer[4]&0x20)
-            *pressed_keys |= G15_KEY_G16;
-
-        if (buffer[5]&0x40)
-            *pressed_keys |= G15_KEY_G17;
-
-        if (buffer[8]&0x40)
-            *pressed_keys |= G15_KEY_G18;
-
-        if (buffer[6]&0x01)
-            *pressed_keys |= G15_KEY_M1;
-        if (buffer[7]&0x02)
-            *pressed_keys |= G15_KEY_M2;
-        if (buffer[8]&0x04)
-            *pressed_keys |= G15_KEY_M3;
-        if (buffer[7]&0x40)
-            *pressed_keys |= G15_KEY_MR;
-
-        if (buffer[8]&0x80)
-            *pressed_keys |= G15_KEY_L1;
-        if (buffer[2]&0x80)
-            *pressed_keys |= G15_KEY_L2;
-        if (buffer[3]&0x80)
-            *pressed_keys |= G15_KEY_L3;
-        if (buffer[4]&0x80)
-            *pressed_keys |= G15_KEY_L4;
-        if (buffer[5]&0x80)
-            *pressed_keys |= G15_KEY_L5;
-
-        if (buffer[1]&0x80)
-            *pressed_keys |= G15_KEY_LIGHT_ON;
-
-    }
-
-    if (buffer[0] == 0x25)
-    {
-        if (buffer[3]&0x01)
-      *pressed_keys |= G15_KEY_G1;
-        if (buffer[3]&0x02)
-      *pressed_keys |= G15_KEY_G2;
-        if (buffer[3]&0x04)
-      *pressed_keys |= G15_KEY_G3;
-        if (buffer[3]&0x08)
-      *pressed_keys |= G15_KEY_G4;
-        if (buffer[3]&0x10)
-      *pressed_keys |= G15_KEY_G5;
-        if (buffer[3]&0x20)
-      *pressed_keys |= G15_KEY_G6;
-        if (buffer[3]&0x40)
-      *pressed_keys |= G15_KEY_G7;
-        if (buffer[3]&0x80)
-      *pressed_keys |= G15_KEY_G8;
-
-        if (buffer[4]&0x01)
-      *pressed_keys |= G15_KEY_G9;
-        if (buffer[4]&0x02)
-      *pressed_keys |= G15_KEY_G10;
-        if (buffer[4]&0x04)
-      *pressed_keys |= G15_KEY_G11;
-        if (buffer[4]&0x08)
-      *pressed_keys |= G15_KEY_G12;
-        if (buffer[4]&0x10)
-      *pressed_keys |= G15_KEY_G13;
-        if (buffer[4]&0x20)
-      *pressed_keys |= G15_KEY_G14;
-        if (buffer[4]&0x40)
-      *pressed_keys |= G15_KEY_G15;
-        if (buffer[4]&0x80)
-      *pressed_keys |= G15_KEY_G16;
-        if (buffer[5]&0x01)
-      *pressed_keys |= G15_KEY_G17;
-        if (buffer[5]&0x02)
-      *pressed_keys |= G15_KEY_G18;
-        if (buffer[5]&0x04)
-      *pressed_keys |= G15_KEY_G19;
-        if (buffer[5]&0x08)
-      *pressed_keys |= G15_KEY_G20;
-        if (buffer[5]&0x10)
-      *pressed_keys |= G15_KEY_G21;
-        if (buffer[5]&0x20)
-      *pressed_keys |= G15_KEY_G22;
-        if (buffer[5]&0x80)
-      *pressed_keys |= G15_KEY_LIGHT_ON;
-
-        if (buffer[6]&0x01)
-      *pressed_keys |= G15_KEY_L1;
-        if (buffer[6]&0x02)
-      *pressed_keys |= G15_KEY_L2;
-        if (buffer[6]&0x04)
-      *pressed_keys |= G15_KEY_L3;
-        if (buffer[6]&0x08)
-      *pressed_keys |= G15_KEY_L4;
-        if (buffer[6]&0x10)
-      *pressed_keys |= G15_KEY_L5;
-
-        if (buffer[6]&0x20)
-      *pressed_keys |= G15_KEY_M1;
-        if (buffer[6]&0x40)
-      *pressed_keys |= G15_KEY_M2;
-        if (buffer[6]&0x80)
-      *pressed_keys |= G15_KEY_M3;
-        if (buffer[7]&0x01)
-      *pressed_keys |= G15_KEY_MR;
-
-      /*
-        if (buffer[7]&0x02)
-      *pressed_keys |= G15_KEY_JOYBL;
-        if (buffer[7]&0x04)
-      *pressed_keys |= G15_KEY_JOYBD;
-        if (buffer[7]&0x08)
-      *pressed_keys |= G15_KEY_JOYBS;
-      */
-    }
-}
 
 void G15Interface::processKeyEvent5Byte(uint64_t *pressed_keys, unsigned char *buffer)
 {
@@ -689,210 +521,33 @@ void G15Interface::processKeyEvent5Byte(uint64_t *pressed_keys, unsigned char *b
 
     log(stderr,G15_LOG_WARN,"Keyboard: %x, %x, %x, %x, %x\n",buffer[0],buffer[1],buffer[2],buffer[3],buffer[4]);
 
+    // The header byte is a determinant of which type of event source it is (hence mapping)
     if (buffer[0] == 0x02)
     {
-        if (buffer[1]&0x01)
-            *pressed_keys |= G15_KEY_G1;
-
-        if (buffer[1]&0x02)
-            *pressed_keys |= G15_KEY_G2;
-
-        if (buffer[1]&0x04)
-            *pressed_keys |= G15_KEY_G3;
-
-        if (buffer[1]&0x08)
-            *pressed_keys |= G15_KEY_G4;
-
-        if (buffer[1]&0x10)
-            *pressed_keys |= G15_KEY_G5;
-
-        if (buffer[1]&0x20)
-            *pressed_keys |= G15_KEY_G6;
-
-        if (buffer[1]&0x40)
-            *pressed_keys |= G15_KEY_M1;
-
-        if (buffer[1]&0x80)
-            *pressed_keys |= G15_KEY_M2;
-
-        if (buffer[2]&0x20)
-            *pressed_keys |= G15_KEY_M3;
-
-        if (buffer[2]&0x40)
-            *pressed_keys |= G15_KEY_MR;
-
-        if (buffer[2]&0x80)
-            *pressed_keys |= G15_KEY_L1;
-
-        if (buffer[2]&0x2)
-            *pressed_keys |= G15_KEY_L2;
-
-        if (buffer[2]&0x4)
-            *pressed_keys |= G15_KEY_L3;
-
-        if (buffer[2]&0x8)
-            *pressed_keys |= G15_KEY_L4;
-
-        if (buffer[2]&0x10)
-            *pressed_keys |= G15_KEY_L5;
-
-        if (buffer[2]&0x1)
-            *pressed_keys |= G15_KEY_LIGHT_ON;
+    	// G15/G15v2...it's...a bit convoluted...
+    	*pressed_keys |= (buffer[1] & 0x3f);										// First block is fine.
+    	*pressed_keys |= ((buffer[1] & 0xc0) >> 6) << G15_MAPPING_1;				// Second block comes from the high-bits, goes to M1/M2.
+    	*pressed_keys |= (buffer[2] & 0x01) ? G15_KEY_LIGHT_ON : G15_KEY_LIGHT_OFF;	// Light's the first bit.
+    	*pressed_keys |= (buffer[2] & 0x80) ? G15_KEY_L1 : 0;						// L1 key's the last bit.
+    	*pressed_keys |= ((buffer[2] & 0x1f) >> 1) << G15_MAPPING_2;				// The L2->L5 keys are relatively sane.
+    	*pressed_keys |= ((buffer[2] & 0x60) >> 5) << G15_MAPPING_3;				// The M3/MR keys are also so.
     }
 
-    // G510
     if (buffer[0] == 0x03)
     {
-        if (buffer[1]&0x01)
-            *pressed_keys |= G15_KEY_G1;
-
-        if (buffer[1]&0x02)
-            *pressed_keys |= G15_KEY_G2;
-
-        if (buffer[1]&0x04)
-            *pressed_keys |= G15_KEY_G3;
-
-        if (buffer[1]&0x08)
-            *pressed_keys |= G15_KEY_G4;
-
-        if (buffer[1]&0x10)
-            *pressed_keys |= G15_KEY_G5;
-
-        if (buffer[1]&0x20)
-            *pressed_keys |= G15_KEY_G6;
-
-        if (buffer[1]&0x40)
-            *pressed_keys |= G15_KEY_G7;
-
-        if (buffer[1]&0x80)
-            *pressed_keys |= G15_KEY_G8;
-
-        if (buffer[2]&0x01)
-            *pressed_keys |= G15_KEY_G9;
-
-        if (buffer[2]&0x02)
-            *pressed_keys |= G15_KEY_G10;
-
-        if (buffer[2]&0x04)
-            *pressed_keys |= G15_KEY_G11;
-
-        if (buffer[2]&0x08)
-            *pressed_keys |= G15_KEY_G12;
-
-        if (buffer[2]&0x10)
-            *pressed_keys |= G15_KEY_G13;
-
-        if (buffer[2]&0x20)
-            *pressed_keys |= G15_KEY_G14;
-
-        if (buffer[2]&0x40)
-            *pressed_keys |= G15_KEY_G15;
-
-        if (buffer[2]&0x80)
-            *pressed_keys |= G15_KEY_G16;
-
-        if (buffer[3]&0x01)
-            *pressed_keys |= G15_KEY_G17;
-
-        if (buffer[3]&0x02)
-            *pressed_keys |= G15_KEY_G18;
-
-        if (buffer[3]&0x10)
-            *pressed_keys |= G15_KEY_M1;
-
-        if (buffer[3]&0x20)
-            *pressed_keys |= G15_KEY_M2;
-
-        if (buffer[3]&0x40)
-            *pressed_keys |= G15_KEY_M3;
-
-        if (buffer[3]&0x80)
-            *pressed_keys |= G15_KEY_MR;
-
-        if (buffer[4]&0x1)
-            *pressed_keys |= G15_KEY_L1;
-
-        if (buffer[4]&0x2)
-            *pressed_keys |= G15_KEY_L2;
-
-        if (buffer[4]&0x4)
-            *pressed_keys |= G15_KEY_L3;
-
-        if (buffer[4]&0x8)
-            *pressed_keys |= G15_KEY_L4;
-
-        if (buffer[4]&0x10)
-            *pressed_keys |= G15_KEY_L5;
-
-        if (buffer[3]&0x8)
-            *pressed_keys |= G15_KEY_LIGHT_ON;
+    	// G510s...at least a little simpler...G-keys are sane.  The Macro keys are sane.
+    	*pressed_keys |= buffer[1];
+    	*pressed_keys |= buffer[2] << G510s_MAPPING_1;
+    	*pressed_keys |= (buffer[3] & 0x03) << G510s_MAPPING_2;
+     	*pressed_keys |= ((buffer[3] & 0xf0) >> 4) << G510s_MAPPING_3; 				// Macro keys block.
+     	*pressed_keys |= buffer[4] << G510s_MAPPING_4;								// LCD control keys block.
     }
 }
 
-void G15Interface::processKeyEvent4Byte(uint64_t *pressed_keys, unsigned char *buffer)
-{
-	*pressed_keys = 0;
-
-	log(stderr,G15_LOG_WARN,"Keyboard: %x, %x, %x, %x\n",buffer[0],buffer[1],buffer[2],buffer[3]);
-
-	if (buffer[0] == 0x02)
-	{
-		if (buffer[1]&0x01)
-			*pressed_keys |= G15_KEY_G1;
-
-		if (buffer[1]&0x02)
-			*pressed_keys |= G15_KEY_G2;
-
-		if (buffer[1]&0x04)
-			*pressed_keys |= G15_KEY_G3;
-
-		if (buffer[1]&0x08)
-			*pressed_keys |= G15_KEY_G4;
-
-		if (buffer[1]&0x10)
-			*pressed_keys |= G15_KEY_G5;
-
-		if (buffer[1]&0x20)
-			*pressed_keys |= G15_KEY_G6;
-
-		if (buffer[1]&0x40)
-			*pressed_keys |= G15_KEY_G7;
-
-		if (buffer[1]&0x80)
-			*pressed_keys |= G15_KEY_G8;
-
-		if (buffer[2]&0x01)
-			*pressed_keys |= G15_KEY_G9;
-
-		if (buffer[2]&0x02)
-			*pressed_keys |= G15_KEY_G10;
-
-		if (buffer[2]&0x04)
-			*pressed_keys |= G15_KEY_G11;
-
-		if (buffer[2]&0x08)
-			*pressed_keys |= G15_KEY_G12;
-
-		if (buffer[2]&0x10)
-			*pressed_keys |= G15_KEY_M1;
-
-		if (buffer[2]&0x20)
-			*pressed_keys |= G15_KEY_M2;
-
-		if (buffer[2]&0x40)
-			*pressed_keys |= G15_KEY_M3;
-
-		if (buffer[2]&0x80)
-			*pressed_keys |= G15_KEY_MR;
-
-		if (buffer[3]&0x1)
-			*pressed_keys |= G15_KEY_LIGHT_ON;
-	}
-}
 
 
-// The Media Keys are intercepted in this design- and HID brings them in to us
-// as 2-byte reports...
+// The Media Keys are not fully presented on the G510s.  They're handed to us as two-
+// byte event packets via the HID edge...
 void G15Interface::processKeyEvent2Byte(uint64_t *pressed_keys, unsigned char *buffer)
 {
 	*pressed_keys = 0;
@@ -901,23 +556,7 @@ void G15Interface::processKeyEvent2Byte(uint64_t *pressed_keys, unsigned char *b
 
 	if (buffer[0] == 0x02)
 	{
-		if(buffer[1] == 0x01)
-			*pressed_keys |= G15_KEY_FWD;
-
-		if(buffer[1] == 0x02)
-			*pressed_keys |= G15_KEY_REW;
-
-		if(buffer[1] == 0x04)
-			*pressed_keys |= G15_KEY_STOP;
-
-		if(buffer[1] == 0x08)
-			*pressed_keys |= G15_KEY_PLAY;
-
-		if(buffer[1] == 0x20)
-			*pressed_keys |= G15_KEY_VOL_UP;
-
-		if(buffer[1] == 0x40)
-			*pressed_keys |= G15_KEY_VOL_DOWN;
+		*pressed_keys |= uint64_t(buffer[1]) << G510s_MAPPING_5;
 	}
 
 	if (buffer[0] == 0x04)
@@ -930,13 +569,65 @@ void G15Interface::processKeyEvent2Byte(uint64_t *pressed_keys, unsigned char *b
 	}
 }
 
+// The G13 generates 8-byte events solely.  The G510s does an...odd mix of 2, 5, and 8 byte
+// events.  This is to handle the 8-byters where they come.
+void G15Interface::processKeyEvent8Byte(uint64_t *pressed_keys, unsigned char *buffer)
+{
+	*pressed_keys = 0;
+
+	log(stderr,G15_LOG_WARN,"Keyboard: %x, %x, %x, %x, %x, %x, %x, %x\n",
+			buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6], buffer[7]);
+
+	if (buffer[0] == 0x01)
+	{
+		// For now, we're doing just the G13 via the 8-byte event edge.  The G510s needs some work
+		// and still presents via the 5-byte event interface in a relatively sane mapping- so we're
+		// not using the other for now...
+		if (getCapabilities() & G15_IS_G13)
+		{
+			// First two bytes after header are +/- 128 X/Y values for the joystick on the G13.
+			// FIXME -- We need to add this into the framework somehow- each event has joystick
+			// 			state in it and it reflects the state as it's being moved.  And we
+			// 			DO want the joystick in there somehow as either a joystick or mouse-like
+			// 			device in the input loop.
+
+			// Fourth byte is the first set of 8 G-keys on the G13- one-to-one with our mapping.
+			*pressed_keys = buffer[3];
+
+			// Fifth byte is the second set of 8 G-keys on the G13- one-to-one with our mapping.
+			*pressed_keys |= (buffer[4] << G13_MAPPING_1);
+
+			// Sixth byte has the final set of G-keys, combined with the backlight switch on/off
+			// bit...  SO, slightly more thought and ops with this one...
+			*pressed_keys |= ((buffer[5] & 0x7f) << G13_MAPPING_2);
+			*pressed_keys |= (buffer[5] & 0x80) ? G15_KEY_LIGHT_ON : G15_KEY_LIGHT_OFF;
+
+			// Seventh byte has the display keypad bits and all but the MR record button...
+			*pressed_keys |= (buffer[6] << G13_MAPPING_3);
+
+			// Eighth byte has the MR button and the thumbstick's buttons as the first three bytes...
+			*pressed_keys |= (uint64_t(buffer[7] & 0x07) << G13_MAPPING_4);
+		}
+	}
+}
 
 int G15Interface::getPressedKeys(uint64_t *pressed_keys, unsigned int timeout)
 {
 	unsigned char buffer[G15_KEY_READ_LENGTH];
-	int retVal = G15_ERROR_TRY_AGAIN;			// Counterintuitive...but the caller should NEVER get this.
 	int ret = 0;
 
+	// If the device doesn't support keys, just error out as unsupported...
+	int retVal = (getCapabilities() & G15_KEYS) ? G15_ERROR_TRY_AGAIN : G15_ERROR_UNSUPPORTED;
+
+	// This is to catch retryable failures.  Some devices push spurious crap out the
+	// HID edge (why are you generating TWO events per keypress on some devices, Logitech!?)
+	// so we need the ability to get the desired keys off without passing bad junk back
+	// up to the caller.
+	//
+	// (01-04-15)
+	//
+	// FIXME -- we really need to see if we can reconcile the G13's thumstick and anytime
+	//			the HID edge hands us the whole keyboard properly.
 	while (retVal == G15_ERROR_TRY_AGAIN)
 	{
 		ret = hid_read_timeout(_hidDev, buffer, sizeof(buffer), timeout);
@@ -944,35 +635,42 @@ int G15Interface::getPressedKeys(uint64_t *pressed_keys, unsigned int timeout)
 		{
 		case 2:
 			processKeyEvent2Byte(pressed_keys, buffer);
-			retVal = G15_NO_ERROR;
-			break;
-
-		case 4:
-			processKeyEvent4Byte(pressed_keys, buffer);
-			retVal = G15_NO_ERROR;
+			if (*pressed_keys)
+			{
+				retVal = G15_NO_ERROR;
+			}
 			break;
 
 		case 5:
 			processKeyEvent5Byte(pressed_keys, buffer);
-			retVal = G15_NO_ERROR;
+			{
+				retVal = G15_NO_ERROR;
+			}
 			break;
 
-		case 9:
-			processKeyEvent9Byte(pressed_keys, buffer);
-			retVal = G15_NO_ERROR;
+		case 7:
+			// Catch the 7-byte entry and just quietly tell the world to try again...
+			break;
+
+		case 8:
+			// G13's seem to be using this out of the HID interface.  We have a bit
+			// different behavior from the G510s and the G15v2 I have in hand off
+			// of the HID interface.  It's self-consistent, so I'm forging forward
+			// with it all.  HID's going to be a better solution, ultimately, for
+			// this stuff as it's how pretty much every other "magic" gamer keyboard
+			// actually seems to work.
+			processKeyEvent8Byte(pressed_keys, buffer);
+			if ((getCapabilities() & G15_IS_G13) && (*pressed_keys))
+			{
+				retVal = G15_NO_ERROR;
+			}
+			// Quietly do a retry if it's a G510s for now...don't have those mappings.  (FIXME -- See if we can TURN THAT OFF!)
 			break;
 
 		case 0:
 			// Timeout...if the caller gives us one- if not, we should
 			// never really see this...
 			retVal = G15_ERROR_TIMEOUT;
-			break;
-
-		case 8:
-			// Pretty much all of the HID-centric output from the
-			// G-series keyboards and devices appear to be 2, 5, and 8
-			cout << "Got an 8-byte-er...probably need to process this one..." << endl;
-			retVal = G15_ERROR_TRY_AGAIN;
 			break;
 
 		default:
@@ -989,3 +687,4 @@ int G15Interface::getPressedKeys(uint64_t *pressed_keys, unsigned int timeout)
 
 	return retVal;
 }
+

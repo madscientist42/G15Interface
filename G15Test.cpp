@@ -130,7 +130,7 @@ int main()
 			uint64_t g_keys = 0;
 			while ((test[0].getPressedKeys(&g_keys, -1) == G15_NO_ERROR) && !(g_keys & G15_KEY_MR))		// We'll key exit off the Macro Record button for this test...
 			{
-				cout << "Pressed Keys : " << g_keys << endl;
+				cout << "Pressed Keys : " << hex << g_keys << endl;
 
 				// Do a few cute things.  Let's set the LEDs based off of state...
 				led_val = 0;
