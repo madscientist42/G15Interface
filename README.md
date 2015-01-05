@@ -41,7 +41,7 @@ What sort-of works:
   and not leave the device hosed up on you.  One of the big problems with
   the original library (and all the apps that used it, including Gnome15...)
   is that if the controlling daemon, whether it was G15Daemon or Gnome15's
-  service, you'd have the G510s lock up, needing you to hotplug it to have
+  service, died you'd have the G510s lock up, needing you to hotplug it to have
   it come back and the daemon service to control it again.  Again...not
   terribly acceptable.  I *THINK* I have a handle on this, but I don't seem
   to have a magic...yet...for the G13.  Without it...I can't really claim
