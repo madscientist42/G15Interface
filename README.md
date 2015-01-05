@@ -31,7 +31,27 @@ What works:
   G710 and G19 keyboard.  I'll know more about this when I can afford to lay hands
   on one of each of them...
 
-What doesn't work (Yet- it *IS* a WIP...):
+What sort-of works:
+
+- "Reset" is known to sort-of work on the G15v1 and G510s.  It's a series of
+  HID reports that appear to do the tasks in question.  But, I can't for-sure
+  say that it's working fully as desired or not.  The desire is to effectively
+  have the device disconnect itself from the USB bus and hotplug it right back
+  in so that you have a clean slate once you disconnect the controlling app
+  and not leave the device hosed up on you.  One of the big problems with
+  the original library (and all the apps that used it, including Gnome15...)
+  is that if the controlling daemon, whether it was G15Daemon or Gnome15's
+  service, you'd have the G510s lock up, needing you to hotplug it to have
+  it come back and the daemon service to control it again.  Again...not
+  terribly acceptable.  I *THINK* I have a handle on this, but I don't seem
+  to have a magic...yet...for the G13.  Without it...I can't really claim
+  that the others are properly working because I don't have a solid handle
+  on this one...yet.  Ultimately, I'd like to couple the reset to the unwind
+  so that under almost all conditions of a crash with this library (which
+  I hope never happens, but...  >:-D) this will force the reset calls before
+  dying.
+
+What doesn't work, at-all (Yet- it *IS* a WIP...):
 
 - *ANY* of the G19 support- this MAY be done as a separate little
   beastie from this (i.e. I'll refactor this one a bit and make a more
