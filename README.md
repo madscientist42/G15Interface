@@ -59,6 +59,15 @@ What doesn't work, at-all (Yet- it *IS* a WIP...):
   etc...)  This depends on how much different it is other than the
   display (which I'll account for with a small refactor if that's the
   only oddball thing...)
+- The thumbstick on the G13.  I'm...unsure...right at the moment how to
+  treat it.  Mapping's already clear off of it's input report events
+  (Second and Third bytes of the 8-byte event off of the G13 is the
+  X and Y of the Thumbstick.)- but I need to determine what to do
+  with the WORD size of data.  Make it available as a re-worked
+  get keys where it's there if I've got it, it's just "empty" if
+  I don't?  Dunno right now.  Got to think on it.  It's got to
+  make some sense and be processable by a daemon to produce a mouse
+  or joystick type event from the library's output for it.
 - Keeping the Key events from reaching the input edge without this lib's
   say-so (If you're controlling the G15/G510s, you don't want the keyboard
   events from the G-keys (Which do come out against /dev/input, etc.) going
