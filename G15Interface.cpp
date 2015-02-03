@@ -24,6 +24,9 @@
 
 #include "G15Interface.h"
 
+#include <boost/filesystem.hpp>
+using namespace boost::filesystem;
+
 #include <iostream>
 using namespace std;
 
@@ -86,7 +89,8 @@ int G15Interface::log (FILE *fd, unsigned int level, const char *fmt, ...)
 // and similar APIs were semi-using a HID interface, which didn't
 // mix/play well with the HID device needing to be yanked for
 // libusb's ability to do this "raw".  If it's HID, talk with
-// it via HID.
+// it via HID.  (Not to mention it seems to be more robust
+// and cleaner via HID anyhow...)
 G15InterfaceList G15Interface::getAvailableInterfaces()
 {
 	G15InterfaceList 	retVal;
@@ -105,7 +109,7 @@ G15InterfaceList G15Interface::getAvailableInterfaces()
 				// Found one.  See if it's a G510s or similar.  If it's one of that class, we need
 				// to see if the interface is an even or an odd one in the position slot.  If even,
 				// SKIP it.  It's the bottom, main keyboard edge and won't like us dinking
-				// with it.
+				// with it and it won't work for us on the G-Keys or the controls...
 				if (!(g15_devices[i].caps & G15_DUAL_ENDPOINT) ||
 					((g15_devices[i].caps & G15_DUAL_ENDPOINT) && (cur_dev->interface_number % 2)))
 				{
@@ -132,27 +136,57 @@ G15InterfaceList G15Interface::getAvailableInterfaces()
 int G15Interface::init()
 {
 	int retVal = G15_NO_ERROR;
+	path devPath(_devPath);
 
 	// Try opening this one...
 	_hidDev = hid_open_path(_devPath.c_str());
 	if (_hidDev != NULL)
 	{
-		// Opened...GRAB all input events from it...we own it, lock, stock, and barrel,
+		// Opened...GRAB all input events from it as needed...we own it, lock, stock, and barrel,
 		// from this moment forward until close (Have to...can't allow anything else from the
 		// regular keyboards (G11, G15, G510s, etc.) since they generate events to
 		// the world from the G-keys, etc. that we DO NOT WANT GOING THERE when
-		// the user is running with us controlling the interface (There needs to be
-		// an ancillary daemon, possibly one running with "root" or similar permissions
-		// that is at the base, coupled with a user account based profile/app/plugin
-		// processing daemon (so that when you switch users, the macros, etc. change
-		// accordingly)  However it's done, though, we have to snag the input using
-		// EVIOCGRAB against the ioctl edge on it's input because this library will
-		// be processing inputs/basic keymaps instead of the kernel the moment we do
-		// this call successfully.
-		//
-		// FCE (12-05-14)
+		// the user is running with us controlling the interface via this library.
+		_inputPath = "/sys/class/hidraw/" + devPath.filename().string() + "/device/input";
+		if (!access(_inputPath.c_str(), F_OK))
+		{
+			// We have an input edge- it's exposed as a full-on keyboard...figure out the
+			// rest of the path here...
+			path p(_inputPath);
+			directory_iterator it(p);
+			directory_iterator end_it;
+			_inputPath = "";
 
-		// FIXME -- Need the grab implementation  (FCE -- 12-05-14)
+			// FIXME -- Presume that the first entry is the one that is our path.
+			p = path(it->path().string());
+			for (it = directory_iterator(p); it != end_it; it++)
+			{
+				if (it->path().filename().string().substr(0, 5) == "event")
+				{
+					_inputPath = "/dev/input/" + it->path().filename().string();
+					break;
+				}
+			}
+			if (!_inputPath.empty())
+			{
+				// GRAB IT- we have a device....
+				_inputDev = open(_inputPath.c_str(), O_RDONLY);
+				if (_inputDev == -1)
+				{
+					cout << "Error: Failed to open event device!  (This means we're going to get JUNK!)" << endl;
+				}
+				else
+				{
+					// Opened...take full control of the inputs from this edge...and just ignore 'em...
+					if (ioctl(_inputDev, EVIOCGRAB, 1))
+					{
+						cout << "Error: Failed to GRAB event device!  (This means we're going to get JUNK!)" << endl;
+						cout << "errno = " << errno << endl;
+					}
+				}
+			}
+		}
+
 	}
 	else
 	{
@@ -164,24 +198,29 @@ int G15Interface::init()
 
 int G15Interface::reset(void)
 {
-	int retVal = 0;
+	int retVal = G15_ERROR_UNSUPPORTED;
 
-	// Issue a reset request against the feature report.  This
-	// has the effect of hotplugging the device on the caller
-	// so we're going to close() for them.  The caller will
-	// need to re-enumerate their list to properly talk to
-	// the device at that point in time.
-	if (_hidDev != NULL)
+	// If we don't have keys or if we have them and are a G13, this won't work
+	// right.  So, we don't support it if we meet either criteria...
+	if ((getCapabilities() & G15_KEYS) && !(getCapabilities() & G15_IS_G13))
 	{
-		_buf[0] = 2;
-		_buf[1] = 64;
-		_buf[2] = 0;
-		_buf[3] = 0;
-		retVal = hid_send_feature_report(_hidDev, _buf, 4);		// Reset logo if supported...
-		_buf[0] = 1;
-		_buf[1] = 0;
-		retVal = hid_send_feature_report(_hidDev, _buf, 2);		// Smack the reset button if supported...
-		close();
+		// Issue a reset request against the feature report.  This
+		// has the effect of hotplugging the device on the caller
+		// so we're going to close() for them.  The caller will
+		// need to re-enumerate their list to properly talk to
+		// the device at that point in time.
+		if (_hidDev != NULL)
+		{
+			_buf[0] = 2;
+			_buf[1] = 64;
+			_buf[2] = 0;
+			_buf[3] = 0;
+			retVal = hid_send_feature_report(_hidDev, _buf, 4);		// Reset logo if supported...
+			_buf[0] = 1;
+			_buf[1] = 0;
+			retVal = hid_send_feature_report(_hidDev, _buf, 2);		// Smack the reset button if supported...
+			close();
+		}
 	}
 
 	return retVal;
@@ -192,6 +231,8 @@ void G15Interface::close()
 	if (_hidDev != NULL)
 	{
 		// Just in case...release here...
+		ioctl(_inputDev, EVIOCGRAB, 0);
+		::close(_inputDev);
 		hid_close(_hidDev);
 		_hidDev = NULL;
 	}
@@ -514,7 +555,9 @@ int G15Interface::writeMonoPixmapToLCD(unsigned char const *data)
 }
 
 
-
+/*
+ * Provide for a G15's and G510s's dominant G-Keys event type.
+ */
 void G15Interface::processKeyEvent5Byte(uint64_t *pressed_keys, unsigned char *buffer)
 {
     *pressed_keys = 0;
@@ -611,6 +654,20 @@ void G15Interface::processKeyEvent8Byte(uint64_t *pressed_keys, unsigned char *b
 	}
 }
 
+// FIXME -- This is deprecated as a name and a method call as of 01-15-15.  I'm about to
+//			transform this into an getDeviceEvent() or the like call where we get all
+// 			events, including the G13 thumbstick.  We want the multiple key possibilities
+//			from the "pressed_keys" return- but we also want to be be able to handle the
+//			thumbstick events (waste not, want not...) and we just can't put it all
+//			gracefully into	the 64-bit space without sacrificing *something* there.
+//			(Not to mention we will get a joystick event at the same time keys are or
+//			are not pressed...)
+//
+//			Yeah, it's going to make for some interesting work on the daemon/app that uses
+//			this stuff; burn that bridge when I get to it.  The legacy stuff didn't support
+//			it at-all.  I intend on doing better.
+//
+//			FCE (01-15-15)
 int G15Interface::getPressedKeys(uint64_t *pressed_keys, unsigned int timeout)
 {
 	unsigned char buffer[G15_KEY_READ_LENGTH];

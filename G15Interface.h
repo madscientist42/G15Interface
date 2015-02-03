@@ -272,6 +272,10 @@ public:
 	int setKBBrightness(unsigned int level);
 	int setRGBLEDColor(unsigned char r, unsigned char g, unsigned char b);
 
+	// Some feedback for the dev using this would be helpful...
+	string getDevicePath() { return _devPath; };
+	string getEventDevicePath() { return _inputPath; };
+
 	/* Please be warned
 	* the g15 sends two different usb msgs for each key press
 	* but only one of these two is used here. Since we do not want to wait
@@ -288,20 +292,17 @@ private:
 
 	uint32_t 			_modelIndex;
 	string 				_devPath;
+	string				_inputPath;					// If the device sports an event edge, we intercept it...
+	int32_t				_inputDev;					// If the device sports an event edge, we intercept it...
 	hid_device			*_hidDev;
 	uint8_t				_buf[G15_BUFFER_LEN];
 
 	static int log (FILE *fd, unsigned int level, const char *fmt, ...);
-	int grabInputEvents(void);
-	int releaseInputEvents(void);
 	void setModelIndex(uint32_t modelIndex) { _modelIndex = modelIndex; };
 	void setDevPath(const char *path) { _devPath = string(path); };
 	void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char const *data);
-	void processKeyEvent9ByteG13(uint64_t *pressed_keys, unsigned char *buffer);
 	void processKeyEvent8Byte(uint64_t *pressed_keys, unsigned char *buffer);
-	void processKeyEvent9Byte(uint64_t *pressed_keys, unsigned char *buffer);
 	void processKeyEvent5Byte(uint64_t *pressed_keys, unsigned char *buffer);
-	void processKeyEvent4Byte(uint64_t *pressed_keys, unsigned char *buffer);
 	void processKeyEvent2Byte(uint64_t *pressed_keys, unsigned char *buffer);
 
 	uint8_t ReverseBitsInByte(uint8_t v)

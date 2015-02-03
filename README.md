@@ -30,26 +30,14 @@ What works:
   wrong) that the G510s ground rules are going to be the same or similar for the
   G710 and G19 keyboard.  I'll know more about this when I can afford to lay hands
   on one of each of them...
-
-What sort-of works:
-
-- "Reset" is known to sort-of work on the G15v1 and G510s.  It's a series of
-  HID reports that appear to do the tasks in question.  But, I can't for-sure
-  say that it's working fully as desired or not.  The desire is to effectively
-  have the device disconnect itself from the USB bus and hotplug it right back
-  in so that you have a clean slate once you disconnect the controlling app
-  and not leave the device hosed up on you.  One of the big problems with
-  the original library (and all the apps that used it, including Gnome15...)
-  is that if the controlling daemon, whether it was G15Daemon or Gnome15's
-  service, died you'd have the G510s lock up, needing you to hotplug it to have
-  it come back and the daemon service to control it again.  Again...not
-  terribly acceptable.  I *THINK* I have a handle on this, but I don't seem
-  to have a magic...yet...for the G13.  Without it...I can't really claim
-  that the others are properly working because I don't have a solid handle
-  on this one...yet.  Ultimately, I'd like to couple the reset to the unwind
-  so that under almost all conditions of a crash with this library (which
-  I hope never happens, but...  >:-D) this will force the reset calls before
-  dying.
+- Reset works for G15 and G510s.  Going to claim that one and make it such that
+  it's unsupported for the G13.  Besides, it's really a special case- we don't
+  *WANT* to reset except for a daemon or the like dying anyhow.
+- Blocking of key events going to /dev/input from the G-Keys and special
+  keys edge of things on select keyboards.  If the edge we're working with
+  presents a /dev/input event interface, we grab it for the duration of the
+  interface instance being initialized and open to block junk actions we
+  DO NOT WANT.
 
 What doesn't work, at-all (Yet- it *IS* a WIP...):
 
@@ -59,26 +47,35 @@ What doesn't work, at-all (Yet- it *IS* a WIP...):
   etc...)  This depends on how much different it is other than the
   display (which I'll account for with a small refactor if that's the
   only oddball thing...)
-- The thumbstick on the G13.  I'm...unsure...right at the moment how to
-  treat it.  Mapping's already clear off of it's input report events
-  (Second and Third bytes of the 8-byte event off of the G13 is the
-  X and Y of the Thumbstick.)- but I need to determine what to do
-  with the WORD size of data.  Make it available as a re-worked
-  get keys where it's there if I've got it, it's just "empty" if
-  I don't?  Dunno right now.  Got to think on it.  It's got to
-  make some sense and be processable by a daemon to produce a mouse
-  or joystick type event from the library's output for it.
-- Keeping the Key events from reaching the input edge without this lib's
-  say-so (If you're controlling the G15/G510s, you don't want the keyboard
-  events from the G-keys (Which do come out against /dev/input, etc.) going
-  out to everything.  You want to intercept them and hand them out as read
-  G-keys, be able to intercept the keystrokes as normal mapped key-events
-  so you can do key-macro recording with a daemon upstream of this, etc.)
-- Contrast setting on a G15v1.  This is more because I don't have one in
-  hand than anything else.  (Patches welcome- donations of a G15v1 would
-  be even moreso...)  I don't see this being much of an issue, overall.
-  this is because the feature was only on the V1 of the series, and
-  it strikes me as limited in the scope of the in-progress framework.
+- The thumbstick on the G13.  It's about to be the next thing up
+  on the hit-parade as we rework and refactor the getPressedKeys()
+  method.  It is expected to be renamed to getDeviceEvent() and
+  it'll pass the G13 thumbstick as a separate parameter and it'll
+  just be un-set for anything that doesn't present it.
+
+
+Roadmap:
+
+- Thumbstick support proper.
+- Adding "rendering" so that we can frame in versions of the tools that
+  used to be offered by G15tools.  I'm still thinking a bit on this.
+  I'd like to make it be almost like a simple framebuffer, which isn't
+  quite like the old tools were.  I'd like to render into a canvas with
+  almost any bit-bashing API you name and tell it to update off of the
+  canvas.  From there, I've the basis for reworking libg15render in the
+  same manner this has been for the base interface library.  In the end
+  we should have the basics available for people to use directly and
+  easily in ONE library- and then extend it by a G15daemon equivalent.
+- (Not directly with this...because the above two almost complete this
+   piece...) Base daemon support- this is good for doing cutesy one-
+   shot pieces like the "less" clone to the LCD and for the core for
+   something larger.  But...we need something that's at root privs
+   level.  Something vetted well.  Something that can do mappings of
+   select keys to the input interface subsystem since the G510s doesn't
+   do it's media keys "right" under all conditions.  Something that
+   can allow us to have different profiles, colors, etc. for each
+   user as they're active on the console.
+
 
 This is being exposed in Git with an intent of publishing early and often.
 
