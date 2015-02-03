@@ -1,4 +1,4 @@
-G15Inteface
+G15Interface
 ===========
 
 WIP of a re-spin of G15Tools using HIDAPI instead of libusb.
