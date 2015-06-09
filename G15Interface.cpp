@@ -34,7 +34,7 @@ using namespace std;
 // Define the device types we officially support here.  If you add
 // a new device under this library, you need to add it to the end
 // of this structure list...
-#define MAX_DEVICES 10
+#define MAX_DEVICES 11
 const libg15_devices_t G15Interface::g15_devices[MAX_DEVICES] =
 {
 	DEVICE("UNKNOWN", 0x0, 0x0, G15_NONE),
@@ -42,11 +42,12 @@ const libg15_devices_t G15Interface::g15_devices[MAX_DEVICES] =
     DEVICE("Logitech G11",0x46d,0xc225,G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL),
     DEVICE("Logitech G13",0x46d,0xc21c,G15_LCD|G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_IS_G13),
     DEVICE("Logitech G15",0x46d,0xc222,G15_LCD|G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL|G15_CONTRAST_CNTL),
-    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL|G15_DEVICE_5BYTE_RETURN),
+    DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL),
     DEVICE("Logitech G110",0x46d,0xc22b,G15_KEYS|G15_MKEYS|G15_RED_BLUE_BKLT_CNTL),
     DEVICE("Logitech G510s",0x46d,0xc22d,G15_LCD|G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT), /* without audio activated */
     DEVICE("Logitech G510s",0x46d,0xc22e,G15_LCD|G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT), /* with audio activated */
     DEVICE("Logitech G710+",0x46d,0xc22e,G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT),		 /* Hacking this in for now */
+    DEVICE("Cisco UC K725-C",0x046d,0xb321,G15_LCD|G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL),
 };
 
 // Handle the control variable for the logging levels for the library...
@@ -614,7 +615,7 @@ void G15Interface::processKeyEvent2Byte(uint64_t *pressed_keys, unsigned char *b
 
 // The G13 generates 8-byte events solely.  The G510s does an...odd mix of 2, 5, and 8 byte
 // events.  This is to handle the 8-byters where they come.
-void G15Interface::processKeyEvent8Byte(uint64_t *pressed_keys, unsigned char *buffer)
+void G15Interface::processKeyEvent8Byte(uint64_t *pressed_keys, int *xjoy, int *yjoy, unsigned char *buffer)
 {
 	*pressed_keys = 0;
 
@@ -629,10 +630,8 @@ void G15Interface::processKeyEvent8Byte(uint64_t *pressed_keys, unsigned char *b
 		if (getCapabilities() & G15_IS_G13)
 		{
 			// First two bytes after header are +/- 128 X/Y values for the joystick on the G13.
-			// FIXME -- We need to add this into the framework somehow- each event has joystick
-			// 			state in it and it reflects the state as it's being moved.  And we
-			// 			DO want the joystick in there somehow as either a joystick or mouse-like
-			// 			device in the input loop.
+			*xjoy = (int)((signed char)buffer[1]);
+			*yjoy = (int)((signed char)buffer[2]);
 
 			// Fourth byte is the first set of 8 G-keys on the G13- one-to-one with our mapping.
 			*pressed_keys = buffer[3];
@@ -654,24 +653,19 @@ void G15Interface::processKeyEvent8Byte(uint64_t *pressed_keys, unsigned char *b
 	}
 }
 
-// FIXME -- This is deprecated as a name and a method call as of 01-15-15.  I'm about to
-//			transform this into an getDeviceEvent() or the like call where we get all
-// 			events, including the G13 thumbstick.  We want the multiple key possibilities
-//			from the "pressed_keys" return- but we also want to be be able to handle the
-//			thumbstick events (waste not, want not...) and we just can't put it all
-//			gracefully into	the 64-bit space without sacrificing *something* there.
-//			(Not to mention we will get a joystick event at the same time keys are or
-//			are not pressed...)
-//
-//			Yeah, it's going to make for some interesting work on the daemon/app that uses
-//			this stuff; burn that bridge when I get to it.  The legacy stuff didn't support
-//			it at-all.  I intend on doing better.
-//
-//			FCE (01-15-15)
-int G15Interface::getPressedKeys(uint64_t *pressed_keys, unsigned int timeout)
+/*
+ * This is the re-worked interface (In a keep it simple mindset...)- we just added joystick
+ * events to the call- and either we give you something for the the thumbstick...or not.
+ * It only has bearing with an 8-byte HID event anyhow- with the first two bytes being
+ * the values passed back.
+ */
+int G15Interface::getDeviceEvent(uint64_t *pressed_keys, int *xjoy, int *yjoy, unsigned int timeout)
 {
 	unsigned char buffer[G15_KEY_READ_LENGTH];
 	int ret = 0;
+
+	// Clear the joystick values...
+	*xjoy = *yjoy = 0;
 
 	// If the device doesn't support keys, just error out as unsupported...
 	int retVal = (getCapabilities() & G15_KEYS) ? G15_ERROR_TRY_AGAIN : G15_ERROR_UNSUPPORTED;
@@ -716,7 +710,7 @@ int G15Interface::getPressedKeys(uint64_t *pressed_keys, unsigned int timeout)
 			// with it all.  HID's going to be a better solution, ultimately, for
 			// this stuff as it's how pretty much every other "magic" gamer keyboard
 			// actually seems to work.
-			processKeyEvent8Byte(pressed_keys, buffer);
+			processKeyEvent8Byte(pressed_keys, xjoy, yjoy, buffer);
 			if ((getCapabilities() & G15_IS_G13) && (*pressed_keys))
 			{
 				retVal = G15_NO_ERROR;

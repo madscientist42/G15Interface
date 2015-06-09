@@ -283,7 +283,7 @@ public:
 	* case you will get G15_NO_ERROR and ORd keys in pressed_keys
 	* in the bad case you will get G15_ERROR_TRY_AGAIN -> try again
 	*/
-	int getPressedKeys(uint64_t *pressed_keys, unsigned int timeout);
+	int getDeviceEvent(uint64_t *pressed_keys, int *xjoy, int *yjoy, unsigned int timeout);
 
 
 private:
@@ -301,7 +301,7 @@ private:
 	void setModelIndex(uint32_t modelIndex) { _modelIndex = modelIndex; };
 	void setDevPath(const char *path) { _devPath = string(path); };
 	void dumpPixmapIntoLCDFormat(unsigned char *lcd_buffer, unsigned char const *data);
-	void processKeyEvent8Byte(uint64_t *pressed_keys, unsigned char *buffer);
+	void processKeyEvent8Byte(uint64_t *pressed_keys, int *xjoy, int *yjoy, unsigned char *buffer);
 	void processKeyEvent5Byte(uint64_t *pressed_keys, unsigned char *buffer);
 	void processKeyEvent2Byte(uint64_t *pressed_keys, unsigned char *buffer);
 
