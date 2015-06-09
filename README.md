@@ -13,7 +13,8 @@ only worked with the first device found and you were done.  If you have a Z10
 speaker set, you didn't get it to work or your nifty G510s or G13 wouldn't work
 right.  Not really acceptable...in any manner...)  Right now, it's framed in to
 be able to list and provide control support for multiple devices on the machine
-in question.
+in question.  (As an aside, this is using HIDAPI- this means it can technically
+be made to work with Windows AND OSX, but hasn't been validated there yet...)
 
 What works:
 
