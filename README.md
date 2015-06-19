@@ -39,6 +39,8 @@ What works:
   presents a /dev/input event interface, we grab it for the duration of the
   interface instance being initialized and open to block junk actions we
   DO NOT WANT.
+- The G13 Thumbstick.  Added joystick x/y parameters in an extension and re-name of
+  the method call for getting input events out of the API.
 
 What doesn't work, at-all (Yet- it *IS* a WIP...):
 
@@ -48,16 +50,10 @@ What doesn't work, at-all (Yet- it *IS* a WIP...):
   etc...)  This depends on how much different it is other than the
   display (which I'll account for with a small refactor if that's the
   only oddball thing...)
-- The thumbstick on the G13.  It's about to be the next thing up
-  on the hit-parade as we rework and refactor the getPressedKeys()
-  method.  It is expected to be renamed to getDeviceEvent() and
-  it'll pass the G13 thumbstick as a separate parameter and it'll
-  just be un-set for anything that doesn't present it.
 
 
 Roadmap:
 
-- Thumbstick support proper.
 - Adding "rendering" so that we can frame in versions of the tools that
   used to be offered by G15tools.  I'm still thinking a bit on this.
   I'd like to make it be almost like a simple framebuffer, which isn't
