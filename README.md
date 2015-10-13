@@ -76,6 +76,16 @@ Roadmap:
   but the needed daemon for handling the low-level would have to be
   using the same rough API or use the CUSE layer to be clean, so...
 
+In any event on the roadmap items, the desire here, rather than taking
+this to a Linux kernel module, even though it's preferable to the slightly
+more complicated wrapper (in a seperate project, mind...) solution here is
+that this needs to be largely cross platform and a kernel module ISN'T.
+Except for the device lockdown code added to reduce Input layer noise
+(which is ifdef'ed out for anything other than Linux...) this should simply
+work as a base framework for Logitech's G-Series keyboards for Windows
+and OSX, allowing one to implement a new solution if Logitech ever
+quits making their Gaming Software solution.
+
 This is being exposed in Git (Currently on GitHub) with an intent of
 publishing early and often.
 

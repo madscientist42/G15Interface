@@ -267,6 +267,7 @@ int G15Interface::setLCDBrightness(unsigned int level)
 			        break;
 			    default:
 			    	_buf[2] = 0x00;
+			    	break;
 			}
 
 			if (hid_send_feature_report(_hidDev, _buf, 4) < 0)
@@ -627,8 +628,9 @@ void G15Interface::processKeyEvent8Byte(uint64_t *pressed_keys, int *xjoy, int *
 	if (buffer[0] == 0x01)
 	{
 		// For now, we're doing just the G13 via the 8-byte event edge.  The G510s needs some work
-		// and still presents via the 5-byte event interface in a relatively sane mapping- so we're
-		// not using the other for now...
+		// for us to use this and it still presents via the 5-byte event interface in a relatively
+		// sane mapping- so we're not using the other for now...  If we verify that it's the same
+		// mapping space as the G13 or figure the rough deltas, we'll use the "modern" interface.
 		if (getCapabilities() & G15_IS_G13)
 		{
 			// First two bytes after header are +/- 128 X/Y values for the joystick on the G13.
@@ -702,22 +704,19 @@ int G15Interface::getDeviceEvent(uint64_t *pressed_keys, int *xjoy, int *yjoy, u
 			break;
 
 		case 7:
-			// Catch the 7-byte entry and just quietly tell the world to try again...
+			// Catch the 7-byte entry and just quietly tell the world to try again...it's spurious for
+			// our purposes, but not a failure all the same...
 			break;
 
 		case 8:
-			// G13's seem to be using this out of the HID interface.  We have a bit
-			// different behavior from the G510s and the G15v2 I have in hand off
-			// of the HID interface.  It's self-consistent, so I'm forging forward
-			// with it all.  HID's going to be a better solution, ultimately, for
-			// this stuff as it's how pretty much every other "magic" gamer keyboard
-			// actually seems to work.
+			// The G13 uses an 8-byte mapping because it's got all of the stuff the G15/G510 has PLUS it's got the Joypad.
 			processKeyEvent8Byte(pressed_keys, xjoy, yjoy, buffer);
 			if ((getCapabilities() & G15_IS_G13) && (*pressed_keys))
 			{
 				retVal = G15_NO_ERROR;
 			}
-			// Quietly do a retry if it's a G510s for now...don't have those mappings.  (FIXME -- See if we can TURN THAT OFF!)
+			// Quietly do a retry if it's a G510s for now...don't have those mappings but we get BOTH event types.
+			// (FIXME -- See if we can TURN THAT OFF or leverage the new mapping space appropriately!)
 			break;
 
 		case 0:
@@ -727,6 +726,7 @@ int G15Interface::getDeviceEvent(uint64_t *pressed_keys, int *xjoy, int *yjoy, u
 			break;
 
 		default:
+			// Debugging for now.  I'm wanting to see what the silly thing handed me.
 			cout << "read op got " << ret << "bytes - ";
 			for (int i = 0; i < ret; i++)
 			{
