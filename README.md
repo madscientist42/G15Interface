@@ -54,29 +54,33 @@ What doesn't work, at-all (Yet- it *IS* a WIP...):
 
 Roadmap:
 
-- Adding "rendering" so that we can frame in versions of the tools that
-  used to be offered by G15tools.  I'm still thinking a bit on this.
-  I'd like to make it be almost like a simple framebuffer, which isn't
-  quite like the old tools were.  I'd like to render into a canvas with
-  almost any bit-bashing API you name and tell it to update off of the
-  canvas.  From there, I've the basis for reworking libg15render in the
-  same manner this has been for the base interface library.  In the end
-  we should have the basics available for people to use directly and
-  easily in ONE library- and then extend it by a G15daemon equivalent.
-- (Not directly with this...because the above two almost complete this
-   piece...) Base daemon support- this is good for doing cutesy one-
-   shot pieces like the "less" clone to the LCD and for the core for
-   something larger.  But...we need something that's at root privs
-   level.  Something vetted well.  Something that can do mappings of
-   select keys to the input interface subsystem since the G510s doesn't
-   do it's media keys "right" under all conditions.  Something that
-   can allow us to have different profiles, colors, etc. for each
-   user as they're active on the console.
+- Add "rendering" in a manner that exposes a /dev/fb framebuffer-like
+  interface to the library (See the next remarks for reasons why...)
+- Refactor the library as needed to handle being used by a "universal"
+  backlight management tool for backlight-only keyboards (G710+, G910)
+  and to provide a consistent API for that same tool for OTHER keyboards
+  so that I can provide something robust for Steelseries APEX, MSI, etc.)
+- Refactor the library as needed to provide daemon support either from
+  a service perspective or through something CUSE-like.  Haven't
+  fully determined the direction there, but the refactor will be the
+  same work.  Ultimately, Gnome15 or whatever follows needs to gain
+  the benefit of the work here and there's some work on the "kernel"
+  drivers (which were at least at some point out of tree expanded caps
+  HID drivers...but they're not consistent?  You need a G13, G15, etc.
+  driver?  Uhm...based on observations here, that's overengineered
+  because you don't need differing keymappings...  So, *IF* one were
+  to clean out/up Gnome15 and reduce the codebase so there's less
+  Python code, one would be better off leveraging CUSE.  *IF* one were
+  to come up with a new solution than Gnome15 that's more generic, even
+  if they used Gnome15 as a springboard for the same, it's a toss-up
+  but the needed daemon for handling the low-level would have to be
+  using the same rough API or use the CUSE layer to be clean, so...
 
+This is being exposed in Git (Currently on GitHub) with an intent of
+publishing early and often.
 
-This is being exposed in Git with an intent of publishing early and often.
-
-It *currently* is not really intended for general public consumption- but
+It *currently* is not really intended for general public consumption (Though
+this may change fairly soon...it's nearly ready for this role...) - but
 is up for me being able to have multiple backups of the work and history
 and to allow someone that is a dev to scoop it up and extend it (Hey, if you
 like where I'm taking this and you beat me to the punch in finishing part

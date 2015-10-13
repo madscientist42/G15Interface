@@ -32,7 +32,7 @@ using namespace std;
 
 
 // Define the device types we officially support here.  If you add
-// a new device under this library, you need to add it to the end
+// a new device under this library, you need to add it to the *end*
 // of this structure list...
 #define MAX_DEVICES 11
 const libg15_devices_t G15Interface::g15_devices[MAX_DEVICES] =
@@ -46,14 +46,14 @@ const libg15_devices_t G15Interface::g15_devices[MAX_DEVICES] =
     DEVICE("Logitech G110",0x46d,0xc22b,G15_KEYS|G15_MKEYS|G15_RED_BLUE_BKLT_CNTL),
     DEVICE("Logitech G510s",0x46d,0xc22d,G15_LCD|G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT), /* without audio activated */
     DEVICE("Logitech G510s",0x46d,0xc22e,G15_LCD|G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT), /* with audio activated */
-    DEVICE("Logitech G710+",0x46d,0xc22e,G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT),		 /* Hacking this in for now */
-    DEVICE("Cisco UC K725-C",0x046d,0xb321,G15_LCD|G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL),
+    DEVICE("Logitech G710+",0x46d,0xc22e,G15_KEYS|G15_MKEYS|G15_DUAL_ENDPOINT),		 					  /* Hacking this in for now */
+    DEVICE("Cisco UC K725-C",0x046d,0xb321,G15_LCD|G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL),				  /* Hacking this in for now */
 };
 
 // Handle the control variable for the logging levels for the library...
 G15_LOG_LEVEL G15Interface::logLevel;
 
-G15Interface::G15Interface() : _modelIndex(0), _hidDev(NULL)
+G15Interface::G15Interface() : _modelIndex(0), _hidDev(NULL), _inputDev(-1)
 {
 }
 
@@ -303,6 +303,7 @@ int G15Interface::setLCDContrast(unsigned int level)
 		            break;
 		        default:
 		        	_buf[3] = 18;
+		        	break;
 		    }
 
 			if (hid_send_feature_report(_hidDev, _buf, 4) < 0)
@@ -322,8 +323,8 @@ int G15Interface::setKBBrightness(unsigned int level)
 	// This is only supported if you've got keys and *NOT* RGB support
 	// (It appears that if you've got RGB support, you get the option
 	//  of even finer-grained (4 steps on each of R, G, and B for the LEDS)
-	// if that's the case.  This means the G510s and the G710+ both are
-	// controlled slightly differently by this codebase...)
+	// if that's the case.  This means the G510s and the G13 are controlled
+	// slightly different by the codebase here.)
 	if (getCapabilities() && G15_BACKLIGHT_CNTL)
 	{
 		retVal = G15_ERROR_OPENING_USB_DEVICE;
@@ -343,6 +344,7 @@ int G15Interface::setKBBrightness(unsigned int level)
 			        break;
 			    default:
 			    	_buf[2] = 0x0;
+			    	break;
 			}
 
 			if (hid_send_feature_report(_hidDev, _buf, 4) < 0)
