@@ -14,6 +14,8 @@
 #include <iostream>
 using namespace std;
 
+#include <poll.h>
+
 int main()
 {
 	uint8_t	testBuf[G15_BUFFER_LEN];
@@ -108,20 +110,29 @@ int main()
 	    			int l = (j & 2) ? i * 64 : 0;
 	    			int m = (j & 4) ? i * 64 : 0;
 					test[0].setRGBLEDColor(k, l, m);
-					sleep(1);
+					poll(NULL, 0, 100);
 	    		}
 	    	}
 		}
 
 		if (test[0].getCapabilities() & G15_LCD)
 		{
-			cout << "Attempting to set the display with a pattern" << endl;
-			for (int i = 0; i < G15_BUFFER_LEN; i++)
+			cout << "Attempting to set the display with an alternating pattern" << endl;
+			for (int j = 0; j < 7; j++)
 			{
-				testBuf[i] = i % 256;
+				for (int i = 0; i < G15_BUFFER_LEN; i++)
+				{
+					testBuf[i] = 256 - (i % 256);
+				}
+				test[0].writeMonoPixmapToLCD(testBuf);
+				poll(NULL, 0, 50);
+				for (int i = 0; i < G15_BUFFER_LEN; i++)
+				{
+					testBuf[i] = i % 256;
+				}
+				test[0].writeMonoPixmapToLCD(testBuf);
+				poll(NULL, 0, 59);
 			}
-			test[0].writeMonoPixmapToLCD(testBuf);
-			sleep(3);
 		}
 
 		if (test[0].getCapabilities() & G15_KEYS) 	// Pretty much everything has "G-Keys", but...
@@ -138,19 +149,19 @@ int main()
 				led_val = 0;
 				if (g_keys & G15_KEY_M1)
 				{
-					m1_state = ~m1_state;
-					led_val |= (m1_state) ? G15_LED_M1 : 0;
+					m1_state = !m1_state;
 				}
 				if (g_keys & G15_KEY_M2)
 				{
-					m2_state = ~m2_state;
-					led_val |= (m2_state) ? G15_LED_M2 : 0;
+					m2_state = !m2_state;
 				}
 				if (g_keys & G15_KEY_M3)
 				{
-					m3_state = ~m3_state;
-					led_val |= (m3_state) ? G15_LED_M3 : 0;
+					m3_state = !m3_state;
 				}
+				led_val |= (m1_state) ? G15_LED_M1 : 0;
+				led_val |= (m2_state) ? G15_LED_M2 : 0;
+				led_val |= (m3_state) ? G15_LED_M3 : 0;
 				test[0].setLEDs(led_val);
 				poll(NULL, 0, 100);
 			}

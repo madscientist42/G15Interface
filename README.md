@@ -60,21 +60,17 @@ Roadmap:
   backlight management tool for backlight-only keyboards (G710+, G910)
   and to provide a consistent API for that same tool for OTHER keyboards
   so that I can provide something robust for Steelseries APEX, MSI, etc.)
-- Refactor the library as needed to provide daemon support either from
-  a service perspective or through something CUSE-like.  Haven't
-  fully determined the direction there, but the refactor will be the
-  same work.  Ultimately, Gnome15 or whatever follows needs to gain
-  the benefit of the work here and there's some work on the "kernel"
-  drivers (which were at least at some point out of tree expanded caps
-  HID drivers...but they're not consistent?  You need a G13, G15, etc.
-  driver?  Uhm...based on observations here, that's overengineered
-  because you don't need differing keymappings...  So, *IF* one were
-  to clean out/up Gnome15 and reduce the codebase so there's less
-  Python code, one would be better off leveraging CUSE.  *IF* one were
-  to come up with a new solution than Gnome15 that's more generic, even
-  if they used Gnome15 as a springboard for the same, it's a toss-up
-  but the needed daemon for handling the low-level would have to be
-  using the same rough API or use the CUSE layer to be clean, so...
+- Refactor the library as needed to provide functional "daemon" support
+  such that we have a background daemon or similar (While I can see the 
+  value for a G15Daemon, I'm going to go in a differing direction, 
+  being that there's a good prospect of making this work cleanly
+  for Gnome15 (Or a re-work/re-name of it...) to look like we're one 
+  of the kernel drivers (so that we can more readily rid ourselves of
+  the cruft in Gnome15 and use it to support more than just Logitech's 
+  offerings (The Razer Deathstalker Ultimate comes to mind here...)
+  Rather than re-implement the whole lot...just make everything work
+  with the "kernel drivers" method so it'll work so long as we present
+  something that looks like the edges from the drivers in CUSE...)  
 
 In any event on the roadmap items, the desire here, rather than taking
 this to a Linux kernel module, even though it's preferable to the slightly

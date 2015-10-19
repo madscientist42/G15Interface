@@ -53,7 +53,7 @@ const libg15_devices_t G15Interface::g15_devices[MAX_DEVICES] =
 // Handle the control variable for the logging levels for the library...
 G15_LOG_LEVEL G15Interface::logLevel;
 
-G15Interface::G15Interface() : _modelIndex(0), _hidDev(NULL), _inputDev(-1)
+G15Interface::G15Interface() : _modelIndex(0), _hidDev(NULL)
 {
 }
 
@@ -137,59 +137,10 @@ G15InterfaceList G15Interface::getAvailableInterfaces()
 int G15Interface::init()
 {
 	int retVal = G15_NO_ERROR;
-	path devPath(_devPath);
 
 	// Try opening this one...
 	_hidDev = hid_open_path(_devPath.c_str());
-	if (_hidDev != NULL)
-	{
-		// Opened...GRAB all input events from it as needed...we own it, lock, stock, and barrel,
-		// from this moment forward until close (Have to...can't allow anything else from the
-		// regular keyboards (G11, G15, G510s, etc.) since they generate events to
-		// the world from the G-keys, etc. that we DO NOT WANT GOING THERE when
-		// the user is running with us controlling the interface via this library.
-		_inputPath = "/sys/class/hidraw/" + devPath.filename().string() + "/device/input";
-		if (!access(_inputPath.c_str(), F_OK))
-		{
-			// We have an input edge- it's exposed as a full-on keyboard...figure out the
-			// rest of the path here...
-			path p(_inputPath);
-			directory_iterator it(p);
-			directory_iterator end_it;
-			_inputPath = "";
-
-			// FIXME -- Presume that the first entry is the one that is our path.
-			p = path(it->path().string());
-			for (it = directory_iterator(p); it != end_it; it++)
-			{
-				if (it->path().filename().string().substr(0, 5) == "event")
-				{
-					_inputPath = "/dev/input/" + it->path().filename().string();
-					break;
-				}
-			}
-			if (!_inputPath.empty())
-			{
-				// GRAB IT- we have a device....
-				_inputDev = open(_inputPath.c_str(), O_RDONLY);
-				if (_inputDev == -1)
-				{
-					cout << "Error: Failed to open event device!  (This means we're going to get JUNK!)" << endl;
-				}
-				else
-				{
-					// Opened...take full control of the inputs from this edge...and just ignore 'em...
-					if (ioctl(_inputDev, EVIOCGRAB, 1))
-					{
-						cout << "Error: Failed to GRAB event device!  (This means we're going to get JUNK!)" << endl;
-						cout << "errno = " << errno << endl;
-					}
-				}
-			}
-		}
-
-	}
-	else
+	if (_hidDev == NULL)
 	{
 		retVal = G15_ERROR_OPENING_USB_DEVICE;
 	}
@@ -231,9 +182,7 @@ void G15Interface::close()
 {
 	if (_hidDev != NULL)
 	{
-		// Just in case...release here...
-		ioctl(_inputDev, EVIOCGRAB, 0);
-		::close(_inputDev);
+		// Just close our HID interface...
 		hid_close(_hidDev);
 		_hidDev = NULL;
 	}
@@ -661,7 +610,7 @@ void G15Interface::processKeyEvent8Byte(uint64_t *pressed_keys, int *xjoy, int *
  * This is the re-worked interface (In a keep it simple mindset...)- we just added joystick
  * events to the call- and either we give you something for the the thumbstick...or not.
  * It only has bearing with an 8-byte HID event anyhow- with the first two bytes being
- * the values passed back.
+ * the values passed back on a G13...
  */
 int G15Interface::getDeviceEvent(uint64_t *pressed_keys, int *xjoy, int *yjoy, unsigned int timeout)
 {
@@ -715,8 +664,10 @@ int G15Interface::getDeviceEvent(uint64_t *pressed_keys, int *xjoy, int *yjoy, u
 			{
 				retVal = G15_NO_ERROR;
 			}
-			// Quietly do a retry if it's a G510s for now...don't have those mappings but we get BOTH event types.
-			// (FIXME -- See if we can TURN THAT OFF or leverage the new mapping space appropriately!)
+			// Quietly do a retry if it's a G510s (since the mapping's quite a bit different.  If the
+			// G19 uses a similar or identical mapping scheme (i.e. 8 bytes only) to the G13, we'll
+			// process it that way.  Otherwise...)  Not sure *WHY* Logitech did a 5-byte and 8-byte event
+			// mapping for everything except the M<x> keys, which on a G510s, are 5-byte only...
 			break;
 
 		case 0:

@@ -274,7 +274,6 @@ public:
 
 	// Some feedback for the dev using this would be helpful...
 	string getDevicePath() { return _devPath; };
-	string getEventDevicePath() { return _inputPath; };
 
 	/* Please be warned
 	* the g15 sends two different usb msgs for each key press
@@ -292,8 +291,6 @@ private:
 
 	uint32_t 			_modelIndex;
 	string 				_devPath;
-	string				_inputPath;					// If the device sports an event edge, we intercept it...
-	int32_t				_inputDev;					// If the device sports an event edge, we intercept it...
 	hid_device			*_hidDev;
 	uint8_t				_buf[G15_BUFFER_LEN];
 
@@ -307,7 +304,7 @@ private:
 
 	uint8_t ReverseBitsInByte(uint8_t v)
 	{
-	    return (v * 0x0202020202ULL & 0x010884422010ULL) % 1023;
+		return (v * 0x0202020202ULL & 0x010884422010ULL) % 1023;
 	}
 };
 
