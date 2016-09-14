@@ -20,7 +20,9 @@ What works:
 
 - Macro Record/Selection LEDs
 - Macro Record/Selection button detection
-- Backlight brightness on a G15.
+- Backlight brightness on a G15, either display or keyboard
+- Via the G15 specific interface, control an RGB keyboard as white with the 
+  same level settings.
 - RGB color selection on a G13 or G510s
 - LCD bitmap setting on any G15 class "gamepad" including G13, G15v1, G15v2,
   and G510s

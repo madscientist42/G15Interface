@@ -45,8 +45,7 @@ const libg15_devices_t G15Interface::g15_devices[MAX_DEVICES] =
     DEVICE("Logitech G15 v2",0x46d,0xc227,G15_LCD|G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL),
     DEVICE("Logitech G110",0x46d,0xc22b,G15_KEYS|G15_MKEYS|G15_RED_BLUE_BKLT_CNTL),
     DEVICE("Logitech G510s",0x46d,0xc22d,G15_LCD|G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT), /* without audio activated */
-    DEVICE("Logitech G510s",0x46d,0xc22e,G15_LCD|G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT), /* with audio activated */
-    DEVICE("Logitech G710+",0x46d,0xc22e,G15_KEYS|G15_MKEYS|G15_DUAL_ENDPOINT),		 					  /* Hacking this in for now */
+    DEVICE("Logitech G510s",0x46d,0xc22e,G15_LCD|G15_KEYS|G15_MKEYS|G15_RGB_BKLT_CNTL|G15_DUAL_ENDPOINT), /* with audio activated- why? */
     DEVICE("Cisco UC K725-C",0x046d,0xb321,G15_LCD|G15_KEYS|G15_MKEYS|G15_BACKLIGHT_CNTL),				  /* Hacking this in for now */
 };
 
@@ -192,36 +191,53 @@ int G15Interface::setLCDBrightness(unsigned int level)
 {
 	int retVal = G15_ERROR_UNSUPPORTED;
 
-	// This is only supported if you've got an LCD and *NOT* RGB support
-	// (It appears that if you've got RGB support, you get the option
-	//  of even finer-grained (4 steps on each of R, G, and B for the LEDS)
-	// if that's the case.  This means the G510s and the G710+ both are
-	// controlled slightly differently by this codebase...)
-	if ((getCapabilities() & G15_LCD) && (getCapabilities() && G15_BACKLIGHT_CNTL))
+	int caps = getCapabilities();
+	if ((caps & G15_LCD) && ((caps && G15_BACKLIGHT_CNTL) || (caps && G15_RGB_BKLT_CNTL)))
 	{
-		retVal = G15_ERROR_OPENING_USB_DEVICE;
-		if (_hidDev != NULL)
+		if (caps && G15_RGB_BKLT_CNTL)
 		{
-			// Set up the feature report...
-			_buf[0] = 2;
-			_buf[1] = 2;
-			_buf[3] = 0;
+			// Set white, pick the level according to behavior for the
+			// original G15, so we can do the "right" thing here...
 			switch(level)
 			{
 			    case 1 :
-			        _buf[2] = 0x10;
+			    	retVal = setRGBLEDColor(127, 127, 127);
 			        break;
 			    case 2 :
-			    	_buf[2] = 0x20;
+			    	retVal = setRGBLEDColor(255, 255, 255);
 			        break;
 			    default:
-			    	_buf[2] = 0x00;
+			    	retVal = setRGBLEDColor(0, 0, 0);
 			    	break;
 			}
 
-			if (hid_send_feature_report(_hidDev, _buf, 4) < 0)
+		}
+		else
+		{
+			retVal = G15_ERROR_OPENING_USB_DEVICE;
+			if (_hidDev != NULL)
 			{
-				retVal = G15_ERROR_WRITING_USB_DEVICE;
+				// Set up the feature report...
+				_buf[0] = 2;
+				_buf[1] = 2;
+				_buf[3] = 0;
+				switch(level)
+				{
+				    case 1 :
+				        _buf[2] = 0x10;
+				        break;
+				    case 2 :
+				    	_buf[2] = 0x20;
+				        break;
+				    default:
+				    	_buf[2] = 0x00;
+				    	break;
+				}
+
+				if (hid_send_feature_report(_hidDev, _buf, 4) < 0)
+				{
+					retVal = G15_ERROR_WRITING_USB_DEVICE;
+				}
 			}
 		}
 	}
@@ -275,31 +291,53 @@ int G15Interface::setKBBrightness(unsigned int level)
 	//  of even finer-grained (4 steps on each of R, G, and B for the LEDS)
 	// if that's the case.  This means the G510s and the G13 are controlled
 	// slightly different by the codebase here.)
-	if (getCapabilities() && G15_BACKLIGHT_CNTL)
+	int caps = getCapabilities();
+	if ((caps && G15_BACKLIGHT_CNTL) || (caps && G15_RGB_BKLT_CNTL))
 	{
-		retVal = G15_ERROR_OPENING_USB_DEVICE;
-		if (_hidDev != NULL)
+		if (caps && G15_RGB_BKLT_CNTL)
 		{
-			// Set up the output command...
-			_buf[0] = 2;
-			_buf[1] = 1;
-			_buf[3] = 0;
+			// Set white, pick the level according to behavior for the
+			// original G15, so we can do the "right" thing here...
 			switch(level)
 			{
 			    case 1 :
-			        _buf[2] = 0x1;
+			    	retVal = setRGBLEDColor(127, 127, 127);
 			        break;
 			    case 2 :
-			    	_buf[2] = 0x2;
+			    	retVal = setRGBLEDColor(255, 255, 255);
 			        break;
 			    default:
-			    	_buf[2] = 0x0;
+			    	retVal = setRGBLEDColor(0, 0, 0);
 			    	break;
 			}
 
-			if (hid_send_feature_report(_hidDev, _buf, 4) < 0)
+		}
+		else
+		{
+			retVal = G15_ERROR_OPENING_USB_DEVICE;
+			if (_hidDev != NULL)
 			{
-				retVal = G15_ERROR_WRITING_USB_DEVICE;
+				// Set up the output command...
+				_buf[0] = 2;
+				_buf[1] = 1;
+				_buf[3] = 0;
+				switch(level)
+				{
+				    case 1 :
+				        _buf[2] = 0x1;
+				        break;
+				    case 2 :
+				    	_buf[2] = 0x2;
+				        break;
+				    default:
+				    	_buf[2] = 0x0;
+				    	break;
+				}
+
+				if (hid_send_feature_report(_hidDev, _buf, 4) < 0)
+				{
+					retVal = G15_ERROR_WRITING_USB_DEVICE;
+				}
 			}
 		}
 	}
@@ -629,9 +667,6 @@ int G15Interface::getDeviceEvent(uint64_t *pressed_keys, int *xjoy, int *yjoy, u
 	// up to the caller.
 	//
 	// (01-04-15)
-	//
-	// FIXME -- we really need to see if we can reconcile the G13's thumstick and anytime
-	//			the HID edge hands us the whole keyboard properly.
 	while (retVal == G15_ERROR_TRY_AGAIN)
 	{
 		ret = hid_read_timeout(_hidDev, buffer, sizeof(buffer), timeout);
