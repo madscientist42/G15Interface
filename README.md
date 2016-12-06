@@ -56,38 +56,27 @@ What doesn't work, at-all (Yet- it *IS* a WIP...):
 
 Roadmap:
 
+- Bolting this on, at least initially, to a fork of Gnome15, intended
+  to bring the power of G15Interface (which is cleaner than the direct
+  method they came up with, cleaner than libg15, and cleaner than the 
+  kernel modules (which are in mainline, but are viewed as semi-deprecated
+  by at least one of the main kernel maintainers (Greg K-H had an at-length
+  discussion with the Razer keyboard support project on this subject...he
+  dissuaded them to make a driver.  Too many differing devices, much 
+  more cleanly supported via libhid like I'm doing with G15 and soon
+  G19.
+- Adding G19 aupport as hinted at above.
 - Add "rendering" in a manner that exposes a /dev/fb framebuffer-like
   interface to the library (See the next remarks for reasons why...)
 - Refactor the library as needed to handle being used by a "universal"
   backlight management tool for backlight-only keyboards (G710+, G910)
   and to provide a consistent API for that same tool for OTHER keyboards
   so that I can provide something robust for Steelseries APEX, MSI, etc.)
-- Refactor the library as needed to provide functional "daemon" support
-  such that we have a background daemon or similar (While I can see the 
-  value for a G15Daemon, I'm going to go in a differing direction, 
-  being that there's a good prospect of making this work cleanly
-  for Gnome15 (Or a re-work/re-name of it...) to look like we're one 
-  of the kernel drivers (so that we can more readily rid ourselves of
-  the cruft in Gnome15 and use it to support more than just Logitech's 
-  offerings (The Razer Deathstalker Ultimate comes to mind here...)
-  Rather than re-implement the whole lot...just make everything work
-  with the "kernel drivers" method so it'll work so long as we present
-  something that looks like the edges from the drivers in CUSE...)  
-
-In any event on the roadmap items, the desire here, rather than taking
-this to a Linux kernel module, even though it's preferable to the slightly
-more complicated wrapper (in a seperate project, mind...) solution here is
-that this needs to be largely cross platform and a kernel module ISN'T.
-Except for the device lockdown code added to reduce Input layer noise
-(which is ifdef'ed out for anything other than Linux...) this should simply
-work as a base framework for Logitech's G-Series keyboards for Windows
-and OSX, allowing one to implement a new solution if Logitech ever
-quits making their Gaming Software solution.
 
 This is being exposed in Git (Currently on GitHub) with an intent of
 publishing early and often.
 
-It *currently* is not really intended for general public consumption (Though
+It _*currently*_ is not really intended for general public consumption (Though
 this may change fairly soon...it's nearly ready for this role...) - but
 is up for me being able to have multiple backups of the work and history
 and to allow someone that is a dev to scoop it up and extend it (Hey, if you
