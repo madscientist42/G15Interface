@@ -18,9 +18,10 @@ MESSAGE(STATUS ${Boost_LIBRARIES} )
 
 SET (CMAKE_CXX_FLAGS "-std=c++11")
 
-ADD_LIBRARY ( G15Interface SHARED G15Interface.cpp  )
-
+ADD_LIBRARY ( G15Interface SHARED G15Interface.cpp )
+ADD_LIBRARY ( g15interface SHARED g15interface.cpp )
 TARGET_LINK_LIBRARIES ( G15Interface hidapi-hidraw ${Boost_LIBRARIES} )  
+TARGET_LINK_LIBRARIES ( g15interface G15Interface hidapi-hidraw ${Boost_LIBRARIES} )  
 
 ADD_EXECUTABLE ( G15Test G15Test.cpp )
 
